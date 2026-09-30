@@ -1,7 +1,11 @@
 import { getCustomers } from "@/app/actions/customer";
 import { CustomerClient } from "./client";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function CustomersPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const customers = await getCustomers();
   
   return (

@@ -1,7 +1,11 @@
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { SettingsClient } from "./client";
 
 export default async function SettingsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const settings = await prisma.settings.findFirst() || {
     id: "1",
     businessName: "Peter Electricians",

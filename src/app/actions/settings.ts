@@ -1,9 +1,12 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function updateSettings(data: any) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.settings.upsert({
     where: { id: "1" },
     update: {

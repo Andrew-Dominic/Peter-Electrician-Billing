@@ -1,9 +1,12 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getBills() {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   return prisma.invoice.findMany({
     orderBy: { date: "desc" },
     include: { customer: true }
@@ -11,6 +14,8 @@ export async function getBills() {
 }
 
 export async function getBillById(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   return prisma.invoice.findUnique({
     where: { id },
     include: { items: true, customer: true }
@@ -36,6 +41,8 @@ async function generateNextInvoiceNumber() {
 }
 
 export async function saveBill(data: any, id?: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   let finalInvoiceNumber = data.invoiceNumber;
   
   if (!id && !finalInvoiceNumber) {
@@ -113,6 +120,8 @@ export async function saveBill(data: any, id?: string) {
 }
 
 export async function finalizeBill(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.invoice.update({
     where: { id },
     data: { 
@@ -126,6 +135,8 @@ export async function finalizeBill(id: string) {
 }
 
 export async function duplicateBill(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const existing = await getBillById(id);
   if (!existing) throw new Error("Bill not found");
 
@@ -172,6 +183,8 @@ export async function duplicateBill(id: string) {
 }
 
 export async function deleteDraftBill(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const bill = await prisma.invoice.findUnique({ where: { id } });
   if (bill?.status === "FINALIZED") {
     throw new Error("Cannot delete finalized bills.");
@@ -182,6 +195,8 @@ export async function deleteDraftBill(id: string) {
 }
 
 export async function updatePaymentStatus(id: string, amountPaid: number) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const bill = await prisma.invoice.findUnique({ where: { id } });
   if (!bill) throw new Error("Bill not found");
 

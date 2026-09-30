@@ -1,7 +1,11 @@
 import { getMaterials } from "@/app/actions/material";
 import { MaterialClient } from "./client";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function MaterialsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const materials = await getMaterials();
   
   return (

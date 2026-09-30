@@ -3,9 +3,13 @@ import { PlusCircle, FileText, Users, Package } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { useTranslation } from "@/contexts/I18nContext";
 
 export default async function Dashboard() {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const [totalBills, billsThisMonth, totalSales, pendingAmount] = await Promise.all([
     prisma.invoice.count(),
     prisma.invoice.count({

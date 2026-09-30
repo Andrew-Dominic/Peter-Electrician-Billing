@@ -3,8 +3,12 @@ import { getActiveMaterials } from "@/app/actions/material";
 import { getBillById } from "@/app/actions/bill";
 import { BillEditor } from "./BillEditor";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function NewBillPage({ searchParams }: { searchParams: { id?: string } }) {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const [customers, materials, settings] = await Promise.all([
     getCustomers(),
     getActiveMaterials(),

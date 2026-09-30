@@ -1,15 +1,20 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getMaterials() {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   return prisma.material.findMany({
     orderBy: { name: "asc" }
   });
 }
 
 export async function getActiveMaterials() {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   return prisma.material.findMany({
     where: { active: true },
     orderBy: { name: "asc" }
@@ -17,6 +22,8 @@ export async function getActiveMaterials() {
 }
 
 export async function addMaterial(data: any) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.material.create({
     data: {
       name: data.name,
@@ -34,6 +41,8 @@ export async function addMaterial(data: any) {
 }
 
 export async function updateMaterial(id: string, data: any) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.material.update({
     where: { id },
     data: {
@@ -52,6 +61,8 @@ export async function updateMaterial(id: string, data: any) {
 }
 
 export async function toggleMaterialStatus(id: string, active: boolean) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.material.update({
     where: { id },
     data: { active }
@@ -61,6 +72,8 @@ export async function toggleMaterialStatus(id: string, active: boolean) {
 }
 
 export async function deleteMaterial(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
   const result = await prisma.material.delete({
     where: { id }
   });

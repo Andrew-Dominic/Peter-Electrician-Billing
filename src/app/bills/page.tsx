@@ -3,8 +3,12 @@ import { BillClient } from "./client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function BillsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const bills = await getBills();
   
   return (
