@@ -6,9 +6,10 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export default async function NewBillPage({ searchParams }: { searchParams: { id?: string } }) {
+export default async function NewBillPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const session = await getSession();
   if (!session) redirect("/login");
+  const params = await searchParams;
   const [customers, materials, settings] = await Promise.all([
     getCustomers(),
     getActiveMaterials(),
@@ -16,8 +17,8 @@ export default async function NewBillPage({ searchParams }: { searchParams: { id
   ]);
 
   let initialBill = null;
-  if (searchParams.id) {
-    initialBill = await getBillById(searchParams.id);
+  if (params.id) {
+    initialBill = await getBillById(params.id);
   }
 
   return (
