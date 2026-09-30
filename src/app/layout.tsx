@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-50 text-gray-900 min-h-screen flex flex-col lg:flex-row`}>
+      <body suppressHydrationWarning className={`${inter.className} bg-slate-50 text-gray-900 min-h-screen flex flex-col lg:flex-row`}>
         <LayoutWrapper>
           {children}
         </LayoutWrapper>

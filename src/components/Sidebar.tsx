@@ -32,7 +32,7 @@ export function Sidebar() {
   
   const navItems = getNavItems(t);
 
-  const NavLinks = () => (
+  const renderNavLinks = () => (
     <div className="space-y-1 py-4 flex flex-col h-full">
       <div className="flex-1">
         <Link href="/bills/new" className="block mb-6 px-3">
@@ -108,7 +108,7 @@ export function Sidebar() {
               <p className="text-sm text-gray-500 mb-4">{t("sidebar.subtitle")}</p>
             </div>
             <div className="px-3 h-[calc(100vh-100px)]">
-              <NavLinks />
+              {renderNavLinks()}
             </div>
           </SheetContent>
         </Sheet>
@@ -122,7 +122,7 @@ export function Sidebar() {
           <p className="text-sm text-gray-500">{t("sidebar.subtitle")}</p>
         </div>
         <div className="flex-1 overflow-auto px-3 py-2 flex flex-col">
-          <NavLinks />
+          {renderNavLinks()}
         </div>
       </div>
     </>
