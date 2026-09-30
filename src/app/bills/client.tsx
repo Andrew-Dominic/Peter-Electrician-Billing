@@ -53,12 +53,12 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
 
   const ActionButtons = ({ bill }: { bill: any }) => (
     <>
-      <Link href={`/bills/new?id=${bill.id}`}>
-        <Button variant="outline" size="sm" className="gap-2 px-3" title={bill.status === "DRAFT" ? "Edit" : "Preview"}>
+      <Button asChild variant="outline" size="sm" className="gap-2 px-3" title={bill.status === "DRAFT" ? "Edit" : "Preview"}>
+        <Link href={`/bills/new?id=${bill.id}`}>
           {bill.status === "DRAFT" ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           <span>{bill.status === "DRAFT" ? "Edit" : "Preview"}</span>
-        </Button>
-      </Link>
+        </Link>
+      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -181,12 +181,12 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
 
               <div className="flex items-center gap-2 pt-1">
                 <div className="flex-1">
-                  <Link href={`/bills/new?id=${bill.id}`} className="w-full block">
-                    <Button variant="outline" className="w-full gap-2">
+                  <Button asChild variant="outline" className="w-full gap-2">
+                    <Link href={`/bills/new?id=${bill.id}`} className="w-full flex items-center justify-center">
                       {bill.status === "DRAFT" ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       {bill.status === "DRAFT" ? "Edit" : "Preview"}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
