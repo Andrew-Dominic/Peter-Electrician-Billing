@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String?
+  address     String?
+  siteName    String?
+  siteAddress String?
+  invoices    Invoice[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Material {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?
+  unit         String
+  sellingPrice Float
+  costPrice    Float?
+  sku          String?
+  description  String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  invoiceNumber  String        @unique
+  customerId     String?
+  customer       Customer?     @relation(fields: [customerId], references: [id])
+  customerName   String
+  customerPhone  String?
+  customerAddress String?
+  date           DateTime      @default(now())
+  status         String        @default("DRAFT")
+  paymentStatus  String        @default("UNPAID")
+  items          InvoiceItem[]
+  labourItems    String?       // JSON string
+  otherCharges   String?       // JSON string
+  subtotal       Float
+  discountType   String?
+  discountValue  Float?
+  discountAmount Float         @default(0)
+  taxEnabled     Boolean       @default(false)
+  taxRate        Float?
+  taxAmount      Float         @default(0)
+  grandTotal     Float
+  amountPaid     Float         @default(0)
+  balanceDue     Float
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  finalizedAt    DateTime?
+}
+
+model InvoiceItem {
+  id         String  @id @default(cuid())
+  invoiceId  String
+  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  materialId String?
+  name       String
+  unit       String
+  quantity   Float
+  rate       Float
+  amount     Float
+}
+
+model Settings {
+  id             String  @id @default("1")
+  businessName   String  @default("Peter Electricians")
+  ownerName      String?
+  phone          String?
+  alternatePhone String?
+  address        String?
+  email          String?
+  gstNumber      String?
+  invoicePrefix  String  @default("PE-2026-")
+  defaultTax     Float   @default(0)
+  notes          String?
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
