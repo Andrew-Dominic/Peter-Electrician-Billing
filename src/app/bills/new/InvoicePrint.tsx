@@ -5,13 +5,20 @@ export const InvoicePrint = forwardRef<HTMLDivElement, any>(({ bill, settings },
     <div ref={ref} className="p-10 bg-white text-black min-h-[297mm] w-[210mm] mx-auto box-border" style={{ fontFamily: "Arial, sans-serif" }}>
       {/* Header */}
       <div className="flex justify-between items-start border-b-2 border-gray-800 pb-6 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{settings?.businessName || "PETER ELECTRICIANS"}</h1>
-          <p className="text-sm text-gray-600 mt-1 font-medium">Electrical Works & Materials</p>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>{settings?.address}</p>
-            <p>Phone: {settings?.phone}</p>
-            {settings?.gstNumber && <p>GST: {settings.gstNumber}</p>}
+        <div className="flex items-start gap-5">
+          <img 
+            src="/img/logo.jfif" 
+            alt="Logo" 
+            className="w-20 h-20 object-contain"
+          />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{settings?.businessName || "PETER ELECTRICIANS"}</h1>
+            <p className="text-sm text-gray-600 mt-1 font-medium">Electrical Works & Materials</p>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>{settings?.address}</p>
+              <p>Phone: {settings?.phone}</p>
+              {settings?.gstNumber && <p>GST: {settings.gstNumber}</p>}
+            </div>
           </div>
         </div>
         <div className="text-right">

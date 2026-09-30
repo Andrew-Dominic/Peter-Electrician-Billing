@@ -182,13 +182,9 @@ export async function duplicateBill(id: string) {
   return newBill;
 }
 
-export async function deleteDraftBill(id: string) {
+export async function deleteBill(id: string) {
   const session = await getSession();
   if (!session) throw new Error("Unauthorized");
-  const bill = await prisma.invoice.findUnique({ where: { id } });
-  if (bill?.status === "FINALIZED") {
-    throw new Error("Cannot delete finalized bills.");
-  }
   await prisma.invoice.delete({ where: { id } });
   revalidatePath("/bills");
   revalidatePath("/");
