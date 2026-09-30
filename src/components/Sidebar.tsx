@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -29,13 +30,14 @@ const getNavItems = (t: any) => [
 export function Sidebar() {
   const pathname = usePathname();
   const { t, lang, setLang } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
   
   const navItems = getNavItems(t);
 
   const renderNavLinks = () => (
     <div className="space-y-1 py-4 flex flex-col h-full">
       <div className="flex-1">
-        <Link href="/bills/new" className="block mb-6 px-3">
+        <Link href="/bills/new" className="block mb-6 px-3" onClick={() => setIsOpen(false)}>
           <Button className="w-full justify-start gap-2 bg-brand-blue hover:bg-brand-blue-hover">
             <PlusCircle className="h-5 w-5" />
             {t("sidebar.createNewBill")}
@@ -51,6 +53,7 @@ export function Sidebar() {
           <Link
             key={item.name}
             href={item.href}
+            onClick={() => setIsOpen(false)}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
               isActuallyActive
@@ -98,7 +101,7 @@ export function Sidebar() {
     <>
       {/* Mobile Sidebar */}
       <div className="lg:hidden flex items-center p-4 border-b bg-white">
-        <Sheet>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger render={<Button variant="ghost" size="icon" className="mr-2" />}>
             <Menu className="h-6 w-6" />
           </SheetTrigger>
