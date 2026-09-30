@@ -33,6 +33,7 @@ export default async function NewBillPage({ searchParams }: { searchParams: Prom
       </div>
       
       <BillEditor 
+        key={initialBill?.id || "new"}
         customers={customers} 
         materials={materials} 
         initialBill={initialBill} 
