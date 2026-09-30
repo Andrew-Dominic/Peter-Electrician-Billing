@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Eye, Edit, Trash2, Copy, MoreVertical } from "lucide-react";
-import { Invoice } from "@prisma/client";
+import { useState, useRef } from "react";
+import { Search, Eye, Edit, Trash2, Copy, MoreVertical, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { deleteBill, duplicateBill } from "@/app/actions/bill";
+import { deleteBill, duplicateBill, getBillById } from "@/app/actions/bill";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { InvoicePrint } from "./new/InvoicePrint";
+import { useReactToPrint } from "react-to-print";
 
-export function BillClient({ initialBills }: { initialBills: any[] }) {
+export function BillClient({ initialBills, settings }: { initialBills: any[], settings?: any }) {
   const router = useRouter();
   const [bills, setBills] = useState(initialBills);
   const [search, setSearch] = useState("");
@@ -21,8 +22,13 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
 
   const [billToDelete, setBillToDelete] = useState<string | null>(null);
   const [billToDuplicate, setBillToDuplicate] = useState<string | null>(null);
+  const [billToPreview, setBillToPreview] = useState<any | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
+
+  const printRef = useRef(null);
 
   const filteredBills = bills.filter(b => {
     const matchesSearch = 
@@ -51,12 +57,38 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
     router.push(`/bills/new?id=${newBill.id}`);
   };
 
+  const handlePreview = async (id: string) => {
+    setIsPreviewLoading(true);
+    try {
+      const fullBill = await getBillById(id);
+      if (fullBill) {
+        setBillToPreview({
+          ...fullBill,
+          labourItems: fullBill.labourItems ? JSON.parse(fullBill.labourItems as string) : [],
+          otherCharges: fullBill.otherCharges ? JSON.parse(fullBill.otherCharges as string) : []
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load bill preview", error);
+    }
+    setIsPreviewLoading(false);
+  };
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Invoice-${billToPreview?.invoiceNumber || 'Preview'}`,
+  });
+
   const ActionButtons = ({ bill }: { bill: any }) => (
     <>
-      <Button asChild variant="outline" size="sm" className="gap-2 px-3" title={bill.status === "DRAFT" ? "Edit" : "Preview"}>
+      <Button variant="outline" size="sm" className="gap-2 px-3" onClick={() => handlePreview(bill.id)} disabled={isPreviewLoading}>
+        <Eye className="h-4 w-4" />
+        <span>Preview</span>
+      </Button>
+      <Button asChild variant="outline" size="sm" className="gap-2 px-3">
         <Link href={`/bills/new?id=${bill.id}`}>
-          {bill.status === "DRAFT" ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          <span>{bill.status === "DRAFT" ? "Edit" : "Preview"}</span>
+          <Edit className="h-4 w-4" />
+          <span>Edit</span>
         </Link>
       </Button>
       <DropdownMenu>
@@ -179,32 +211,38 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <div className="flex-1">
-                  <Button asChild variant="outline" className="w-full gap-2">
-                    <Link href={`/bills/new?id=${bill.id}`} className="w-full flex items-center justify-center">
-                      {bill.status === "DRAFT" ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      {bill.status === "DRAFT" ? "Edit" : "Preview"}
-                    </Link>
-                  </Button>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="shrink-0">
-                      <MoreVertical className="h-4 w-4" />
+              <div className="flex flex-col gap-2 pt-1">
+                <Button variant="outline" className="w-full gap-2" onClick={() => handlePreview(bill.id)} disabled={isPreviewLoading}>
+                  <Eye className="h-4 w-4" />
+                  Preview Invoice
+                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <Button asChild variant="outline" className="w-full gap-2">
+                      <Link href={`/bills/new?id=${bill.id}`} className="w-full flex items-center justify-center">
+                        <Edit className="h-4 w-4" />
+                        Edit Details
+                      </Link>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setBillToDuplicate(bill.id)} className="py-2.5 cursor-pointer">
-                      <Copy className="h-4 w-4 mr-2" />
-                      Duplicate Invoice
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setBillToDelete(bill.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50 py-2.5 cursor-pointer">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Invoice
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" className="shrink-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setBillToDuplicate(bill.id)} className="py-2.5 cursor-pointer">
+                        <Copy className="h-4 w-4 mr-2" />
+                        Duplicate Invoice
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setBillToDelete(bill.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50 py-2.5 cursor-pointer">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Invoice
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </div>
           ))
@@ -244,6 +282,30 @@ export function BillClient({ initialBills }: { initialBills: any[] }) {
               {isDuplicating ? "Duplicating..." : "Yes, Duplicate"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={!!billToPreview} onOpenChange={(open) => !open && setBillToPreview(null)}>
+        <DialogContent className="sm:max-w-4xl w-[95%] rounded-xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-4 border-b bg-gray-50 shrink-0">
+            <div className="flex justify-between items-center pr-8">
+              <DialogTitle className="text-xl flex items-center gap-2">
+                <Eye className="h-5 w-5 text-brand-blue" />
+                Invoice Preview
+              </DialogTitle>
+              <Button onClick={() => handlePrint()} className="gap-2 bg-brand-blue hover:bg-brand-blue-hover">
+                <Printer className="h-4 w-4" /> Print / Save PDF
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto bg-gray-100/50 p-2 sm:p-6">
+            {billToPreview && (
+              <div className="shadow-lg mx-auto w-max max-w-full overflow-x-auto bg-white rounded-md border">
+                <InvoicePrint ref={printRef} bill={billToPreview} settings={settings} />
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
 
 export default async function BillsPage() {
   const session = await getSession();
   if (!session) redirect("/login");
-  const bills = await getBills();
+  
+  const [bills, settings] = await Promise.all([
+    getBills(),
+    prisma.settings.findFirst()
+  ]);
   
   return (
     <div className="space-y-6">
@@ -25,7 +30,7 @@ export default async function BillsPage() {
         </Link>
       </div>
       
-      <BillClient initialBills={bills} />
+      <BillClient initialBills={bills} settings={settings} />
     </div>
   );
 }

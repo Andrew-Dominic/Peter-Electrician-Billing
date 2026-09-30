@@ -92,7 +92,7 @@ export function BillEditor({ customers, materials, initialBill, settings }: any)
     };
   }, [items, labourItems, otherCharges, discountType, discountValue, taxEnabled, taxRate, amountPaid]);
 
-  const isReadOnly = status === "FINALIZED";
+  const isReadOnly = false;
 
   // Actions
   const handlePrint = useReactToPrint({
@@ -157,7 +157,7 @@ export function BillEditor({ customers, materials, initialBill, settings }: any)
         customerPhone,
         customerAddress,
         date,
-        status: "DRAFT",
+        status: status,
         items: computed.items,
         labourItems,
         otherCharges,
@@ -504,21 +504,20 @@ export function BillEditor({ customers, materials, initialBill, settings }: any)
 
           {/* Actions */}
           <div className="flex flex-col gap-3 sticky top-6">
+            <Button 
+              className="w-full h-14 bg-white text-brand-blue border-2 border-brand-blue/10 hover:border-brand-blue/30 hover:bg-brand-blue/5 rounded-2xl font-semibold text-lg shadow-sm transition-all flex items-center justify-center gap-2" 
+              onClick={handleSaveDraft}
+            >
+              <Save className="h-5 w-5" /> {status === "FINALIZED" ? "Update Bill" : t("billEditor.saveDraft")}
+            </Button>
+
             {status === "DRAFT" && (
-              <>
-                <Button 
-                  className="w-full h-14 bg-white text-brand-blue border-2 border-brand-blue/10 hover:border-brand-blue/30 hover:bg-brand-blue/5 rounded-2xl font-semibold text-lg shadow-sm transition-all flex items-center justify-center gap-2" 
-                  onClick={handleSaveDraft}
-                >
-                  <Save className="h-5 w-5" /> {t("billEditor.saveDraft")}
-                </Button>
-                <Button 
-                  className="w-full h-14 bg-gradient-to-b from-brand-orange to-[#e08218] hover:from-[#f59f33] hover:to-[#cf7613] text-white rounded-2xl font-bold text-lg shadow-[0_4px_14px_0_rgba(244,144,30,0.39)] hover:shadow-[0_6px_20px_rgba(244,144,30,0.23)] border border-[#d67b14] transition-all flex items-center justify-center gap-2" 
-                  onClick={handleFinalize}
-                >
-                  <CheckCircle className="h-5 w-5 text-white/90" /> {t("billEditor.finalizeBill")}
-                </Button>
-              </>
+              <Button 
+                className="w-full h-14 bg-gradient-to-b from-brand-orange to-[#e08218] hover:from-[#f59f33] hover:to-[#cf7613] text-white rounded-2xl font-bold text-lg shadow-[0_4px_14px_0_rgba(244,144,30,0.39)] hover:shadow-[0_6px_20px_rgba(244,144,30,0.23)] border border-[#d67b14] transition-all flex items-center justify-center gap-2" 
+                onClick={handleFinalize}
+              >
+                <CheckCircle className="h-5 w-5 text-white/90" /> {t("billEditor.finalizeBill")}
+              </Button>
             )}
 
             {(status === "FINALIZED" || billId) && (
